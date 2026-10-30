@@ -35,6 +35,8 @@ python tools/masks.py photo_seth.jpg maps/seth
 python tools/build_night.py photo_seth.jpg maps/seth src/textures seth 0 0 0.4
 ```
 
+`photo_seth.jpg` is the original with the top 20% of empty sky cropped off, at 1688×1800.
+
 ```bash
 python tools/masks.py photo_sokheng.jpg maps/sokheng
 python tools/build_studio.py photo_sokheng.jpg maps/sokheng src/textures
