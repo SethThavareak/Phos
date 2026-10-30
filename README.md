@@ -27,7 +27,7 @@ python tools/build_night.py photo_taxzy.jpg maps/taxzy src/textures taxzy
 
 ```bash
 python tools/masks.py photo_zhampt.jpg maps/zhampt
-python tools/build_night.py photo_zhampt.jpg maps/zhampt src/textures zhampt 419 9 0.4
+python tools/build_night.py photo_zhampt.jpg maps/zhampt src/textures zhampt 0 9 0.4
 ```
 
 ```bash

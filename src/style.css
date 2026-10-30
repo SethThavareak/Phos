@@ -187,4 +187,10 @@ a:focus-visible {
     margin-bottom: 12px;
     font-size: clamp(26px, 6.5vw, 44px);
   }
+
+  /* His photo fills the height with no sky above the head, so the copy goes over his legs. */
+  [data-person="zhampt"] #intro {
+    top: auto;
+    bottom: 96px;
+  }
 }
