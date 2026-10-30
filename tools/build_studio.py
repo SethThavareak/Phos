@@ -70,7 +70,7 @@ figure = linear * inside_soft + masked_blur(linear, inside[..., None].repeat(3, 
 shaped = WALL_DEPTH * (1 - alpha) + FIGURE_DEPTH * alpha
 
 # Composition ---------------------------------------------------------------
-photo_h, photo_w = alpha.shape
+photo_w = alpha.shape[1]
 fade = smoothstep(FADE_START, FADE_END, np.arange(CANVAS_W, dtype=np.float32))[None, :, None]
 canvas = np.ones((CANVAS_H, CANVAS_W, 3), np.float32) * WALL * fade
 canvas_depth = np.full((CANVAS_H, CANVAS_W), WALL_DEPTH, np.float32)

@@ -12,8 +12,8 @@ import { mapNode, uWallDepth } from '../textures.js'
 import { coverScaleNode } from './texture-fit.js'
 
 export const uDisplacementScale = uniform(1)
-export const uNormalScale = uniform(1.6)
-export const uDetailScale = uniform(0.9)
+const uNormalScale = uniform(1.6)
+const uDetailScale = uniform(0.9)
 
 const DETAIL_GAIN = 4
 const DETAIL_LOD = 3

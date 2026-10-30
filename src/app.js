@@ -62,7 +62,7 @@ scene.background = new Color('#000000')
 const camera = new OrthographicCamera()
 camera.position.set(0, 0, 5)
 
-setupLight(scene, camera)
+setupLight(scene)
 
 const plane = createPlane()
 scene.add(plane)

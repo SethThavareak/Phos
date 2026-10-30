@@ -8,7 +8,7 @@ import {
 } from 'three/webgpu'
 import { smoothBands } from '../lib/blur.js'
 
-export const depthSmoothing = { percent: 0.25 }
+const depthSmoothing = { percent: 0.25 }
 
 const WORKING_WIDTH = 2048
 

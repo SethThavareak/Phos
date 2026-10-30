@@ -62,7 +62,7 @@ labels = np.load(MAPS / "labels.npy")
 
 # Masks ---------------------------------------------------------------------
 person = ((labels == PERSON) | (depth > 0.74)).astype(np.uint8)
-count, components = cv2.connectedComponents(person)
+_, components = cv2.connectedComponents(person)
 sizes = np.bincount(components.ravel())[1:]
 person = (components == 1 + sizes.argmax()).astype(np.float32)
 person = cv2.GaussianBlur(person, (0, 0), 1.2)

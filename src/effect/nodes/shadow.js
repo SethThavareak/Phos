@@ -14,8 +14,8 @@ import { depthNode, uWallDepth } from '../textures.js'
 import { uDisplacementScale } from './normal.js'
 import { coverScaleNode } from './texture-fit.js'
 
-export const uShadowIntensity = uniform(0.55)
-export const uShadowSoftness = uniform(0.3)
+const uShadowIntensity = uniform(0.55)
+const uShadowSoftness = uniform(0.3)
 
 const SHADOW_STEPS = 12
 const MIN_LIGHT_ANGLE = 0.15

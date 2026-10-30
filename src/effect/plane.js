@@ -5,7 +5,6 @@ import {
   viewZToOrthographicDepth,
 } from 'three/tsl'
 import { Mesh, MeshPhongNodeMaterial, PlaneGeometry } from 'three/webgpu'
-import { diffuseNode } from './nodes/diffuse.js'
 import { normalNode, uDisplacementScale } from './nodes/normal.js'
 import { shadowNode } from './nodes/shadow.js'
 import { coverUv } from './nodes/texture-fit.js'
@@ -22,7 +21,7 @@ export function createPlane() {
   // Not aoNode: in three r184 that only touches ambient, so the point light would cast no shadow.
   // The figure is exempt: guessed self-shadow on a face reads as a bruise, not as light.
   const shadow = shadowNode(vUv, depth).add(depth.smoothstep(FIGURE_DEPTH, FIGURE_DEPTH + 0.04)).min(1)
-  material.colorNode = diffuseNode(vUv, depth).mul(shadow)
+  material.colorNode = mapNode.sample(vUv).rgb.mul(shadow)
   material.normalNode = normalNode(vUv)
   // The sky is far behind the plane, so it glows on its own instead of catching the light.
   material.emissiveNode = mapNode.sample(vUv).rgb.mul(SKY_GLOW).mul(depth.smoothstep(0.06, 0))

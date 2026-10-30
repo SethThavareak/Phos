@@ -5,10 +5,10 @@ const FOLLOW_EASE = 0.12
 const IDLE_AFTER_MS = 4000
 const REDUCED_MOTION = matchMedia('(prefers-reduced-motion: reduce)').matches
 
-export const pointLight = new PointLight('#ffc98a', 4.2, 0, 3.4)
+const pointLight = new PointLight('#ffc98a', 4.2, 0, 3.4)
 pointLight.position.set(0, 0, 0.95)
 
-export const ambientLight = new AmbientLight('#8fa6d8', 0.16)
+const ambientLight = new AmbientLight('#8fa6d8', 0.16)
 
 export const uLightPosition = uniform(pointLight.position)
 
