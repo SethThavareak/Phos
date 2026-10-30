@@ -7,7 +7,7 @@ npm install
 npm run dev
 ```
 
-`npm run build` writes the static site to `dist/`. Name and role are in `index.html`.
+`npm run build` writes the static site to `dist/`. Name, role and description are in `index.html`.
 
 ## Regenerating the image
 
