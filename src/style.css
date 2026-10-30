@@ -48,13 +48,6 @@ canvas {
   transform: translateY(-50%);
 }
 
-.hello {
-  margin: 0 0 14px;
-  font-size: clamp(18px, 1.6vw, 24px);
-  font-style: italic;
-  color: rgb(243 236 225 / 72%);
-}
-
 h1 {
   margin: 0 0 20px;
   font-size: clamp(30px, 3.6vw, 56px);
@@ -66,10 +59,11 @@ h1 {
 /* Negative tracking breaks Khmer's stacked subscripts; they also need the taller line. */
 .khmer {
   display: block;
-  margin-bottom: -0.1em;
+  margin-bottom: 0.06em;
   font-family: "Moulpali", serif;
-  font-size: 2em;
+  font-size: 1.8em;
   line-height: 1.6;
+  white-space: nowrap;
   letter-spacing: 0;
 }
 
