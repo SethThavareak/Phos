@@ -1,7 +1,7 @@
 """Stage 2 for a photo with a real scene: the same night treatment as build_hero.py, on the whole uncropped frame.
 
 The canvas height is the photo height plus top padding, which lowers a head that sits too high for the phone copy.
-Runs locally. usage: build_night.py <photo> <maps dir from masks.py> <src/textures> <name> [top padding px] [segmentation inset px] [wall depth]
+Runs locally. usage: build_night.py <photo> <maps dir from masks.py> <src/textures> <name> [top padding px] [segmentation inset px] [wall depth] [segmentation start, as a share of the height]
 A wall depth flattens the scene onto one plane, for rooms where a plain wall would show the outline of any depth edge.
 """
 import sys
@@ -17,6 +17,7 @@ SRC, MAPS, OUT, NAME = Path(sys.argv[1]), Path(sys.argv[2]), Path(sys.argv[3]), 
 TOP_PAD = int(sys.argv[5]) if len(sys.argv) > 5 else 0
 SEG_INSET = int(sys.argv[6]) if len(sys.argv) > 6 else 0
 WALL_DEPTH = float(sys.argv[7]) if len(sys.argv) > 7 else 0  # keep in sync with wallDepth in app.js
+SEG_START = float(sys.argv[8]) if len(sys.argv) > 8 else 0
 SKY, PERSON = 2, 12  # ADE20K ids
 
 MIN_SURFACE_DEPTH, SKY_DEPTH = 0.12, 0.06  # keep SKY_DEPTH in sync with plane.js
@@ -56,8 +57,10 @@ ring = cv2.dilate(seg, ellipse(61)) - cv2.dilate(seg, ellipse(21))
 split = np.array([(np.median(depth[y][seg[y] > 0]) + np.median(depth[y][ring[y] > 0])) / 2 if seg[y].any() else 1 for y in range(height)], np.float32)
 split = cv2.GaussianBlur(split[:, None], (0, 0), 25)
 person = (depth > split) & (near > 0)
-if SEG_INSET:  # keeps what the depth edge can't separate, like a bare foot on the floor
-    person |= cv2.erode(seg, ellipse(SEG_INSET)) > 0
+if SEG_INSET:  # keeps what the depth edge can't separate: a bare foot on the floor, a shoulder close to the wall
+    kept = cv2.erode(seg, ellipse(SEG_INSET)) > 0
+    kept[: round(height * SEG_START)] = False  # above this segmentation runs loose, as it does around hair
+    person |= kept
 person = largest(person)
 person = cv2.morphologyEx(person, cv2.MORPH_CLOSE, ellipse(9))
 if WALL_DEPTH:

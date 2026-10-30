@@ -32,8 +32,11 @@ python tools/build_night.py photo_zhampt.jpg maps/zhampt src/textures zhampt 0 9
 
 ```bash
 python tools/masks.py photo_seth.jpg maps/seth
-python tools/build_night.py photo_seth.jpg maps/seth src/textures seth 0 0 0.4
+python tools/even_light.py photo_seth.jpg maps/seth photo_seth_even.jpg
+python tools/build_night.py photo_seth_even.jpg maps/seth src/textures seth 0 3 0.4 0.52
 ```
+
+`even_light.py` divides the hard sunlight out of the photo first, so the moving light isn't fighting a shadow baked into the pixels.
 
 `photo_seth.jpg` is the HEIC original with the top 15% and right 18% cropped off, at 1302×1800.
 
