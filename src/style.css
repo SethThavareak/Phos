@@ -49,7 +49,7 @@ canvas {
 }
 
 .hello {
-  margin: 0 0 8px;
+  margin: 0 0 14px;
   font-size: clamp(18px, 1.6vw, 24px);
   font-style: italic;
   color: rgb(243 236 225 / 72%);
@@ -57,7 +57,7 @@ canvas {
 
 h1 {
   margin: 0 0 20px;
-  font-size: clamp(52px, 7.2vw, 112px);
+  font-size: clamp(30px, 3.6vw, 56px);
   font-weight: 400;
   line-height: 0.96;
   letter-spacing: -0.02em;
@@ -66,9 +66,9 @@ h1 {
 /* Negative tracking breaks Khmer's stacked subscripts; they also need the taller line. */
 .khmer {
   display: block;
-  margin-bottom: 4px;
+  margin-bottom: -0.1em;
   font-family: "Moulpali", serif;
-  font-size: 0.72em;
+  font-size: 2em;
   line-height: 1.6;
   letter-spacing: 0;
 }
@@ -138,6 +138,6 @@ a:focus-visible {
 
   h1 {
     margin-bottom: 12px;
-    font-size: clamp(44px, 12.5vw, 88px);
+    font-size: clamp(26px, 6.5vw, 44px);
   }
 }
