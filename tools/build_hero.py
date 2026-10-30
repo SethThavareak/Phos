@@ -11,6 +11,8 @@ import torch
 from PIL import Image
 from transformers import AutoImageProcessor, AutoModelForDepthEstimation
 
+from tone import masked_blur, smoothstep, to_linear, to_srgb
+
 SRC, MAPS, OUT = Path(sys.argv[1]), Path(sys.argv[2]), Path(sys.argv[3])
 SKY, PERSON = 2, 12  # ADE20K ids
 
@@ -19,26 +21,6 @@ CROP_TOP, CROP_BOTTOM = 120, 1240  # trim empty sky and the waist-down
 MIN_SURFACE_DEPTH, SKY_DEPTH = 0.12, 0.06  # keep SKY_DEPTH in sync with plane.js
 MAX_SKY_LUM = 0.03  # brightest the night sky may be before the glow turns it white
 LEFT_FADE = 0.4  # share of the photo width that melts into the dark copy area
-
-
-def smoothstep(low, high, x):
-    t = np.clip((x - low) / (high - low), 0, 1)
-    return t * t * (3 - 2 * t)
-
-
-def to_linear(srgb):
-    return np.where(srgb <= 0.04045, srgb / 12.92, ((srgb + 0.055) / 1.055) ** 2.4)
-
-
-def to_srgb(linear):
-    linear = np.clip(linear, 0, 1)
-    return np.where(linear <= 0.0031308, linear * 12.92, 1.055 * linear ** (1 / 2.4) - 0.055)
-
-
-def masked_blur(values, mask, sigma):
-    """Blur that ignores pixels outside the mask, so silhouettes don't bleed into the high-pass."""
-    weight = cv2.GaussianBlur(mask, (0, 0), sigma) + 1e-5
-    return cv2.GaussianBlur(values * mask, (0, 0), sigma) / weight
 
 
 class Depth:

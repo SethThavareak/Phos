@@ -13,7 +13,16 @@ body {
 #app {
   position: fixed;
   inset: 0;
-  background: #050507 url("./textures/hero.webp") 90% 50% / cover no-repeat;
+  background: #050507 90% 50% / cover no-repeat;
+}
+
+[data-person="ricky"] #app {
+  background-image: url("./textures/hero.webp");
+}
+
+[data-person="sokheng"] #app {
+  background-image: url("./textures/sokheng.webp");
+  background-position: 90% 100%;
 }
 
 #app::after {
@@ -21,7 +30,7 @@ body {
   position: absolute;
   inset: 0;
   background: rgb(5 5 7 / 55%);
-  transition: opacity 0.8s;
+  transition: opacity 0.5s;
 }
 
 .ready #app::after {
@@ -31,11 +40,33 @@ body {
 canvas {
   display: block;
   opacity: 0;
-  transition: opacity 0.8s;
+  transition: opacity 0.5s;
 }
 
 .ready canvas {
   opacity: 1;
+}
+
+#tabs {
+  position: fixed;
+  top: 10px;
+  left: clamp(20px, 6vw, 96px);
+  z-index: 2;
+  display: flex;
+  gap: 20px;
+  font-size: 17px;
+  color: rgb(243 236 225 / 68%);
+  text-shadow: 0 0 8px #000;
+}
+
+#tabs a {
+  padding: 10px 0;
+  text-decoration: none;
+}
+
+#tabs a[aria-current] {
+  color: #f3ece1;
+  text-decoration: underline;
 }
 
 #intro {

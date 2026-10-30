@@ -1,26 +1,37 @@
-import { texture } from 'three/tsl'
-import { SRGBColorSpace, Texture, TextureLoader } from 'three/webgpu'
+import { texture, uniform } from 'three/tsl'
+import { SRGBColorSpace, Texture, TextureLoader, Vector2 } from 'three/webgpu'
 import { setDepthImage } from './depth-map.js'
 
 export const mapNode = texture(new Texture())
 export const depthNode = texture(new Texture())
+// Where the crop sits when the viewport can't show the whole image: keeps the figure in frame on phones.
+export const uFocus = uniform(new Vector2(0.9, 0.5))
+// Depth of a plain wall behind a cutout figure; 0 means the image has real depth to ray-march.
+export const uWallDepth = uniform(0)
 
 const loader = new TextureLoader()
 
-async function setMap(url) {
-  const map = await loader.loadAsync(url)
-  map.colorSpace = SRGBColorSpace
+let latestRequest = 0
+
+export async function setupTextures({ map, depth, focusY, wallDepth = 0 }) {
+  const request = ++latestRequest
+  const [mapTexture, depthTexture] = await Promise.all([
+    loader.loadAsync(map),
+    loader.loadAsync(depth),
+  ])
+  // Tabs can be clicked faster than images load; a stale pair must not overwrite the newer one.
+  if (request !== latestRequest) {
+    mapTexture.dispose()
+    depthTexture.dispose()
+    return
+  }
+
+  mapTexture.colorSpace = SRGBColorSpace
   mapNode.value.dispose()
-  mapNode.value = map
-}
-
-async function setDepth(url) {
-  const map = await loader.loadAsync(url)
+  mapNode.value = mapTexture
   depthNode.value.dispose()
-  depthNode.value = map
-  setDepthImage(map.image)
-}
-
-export function setupTextures({ map, depth }) {
-  return Promise.all([setMap(map), setDepth(depth)])
+  depthNode.value = depthTexture
+  setDepthImage(depthTexture.image)
+  uFocus.value.y = focusY
+  uWallDepth.value = wallDepth
 }

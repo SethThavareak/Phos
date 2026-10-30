@@ -8,11 +8,40 @@ import {
 import { setupLight, updateLight } from './effect/light.js'
 import { createPlane } from './effect/plane.js'
 import { setupTextures } from './effect/textures.js'
-import depth from './textures/hero-depth.webp'
-import map from './textures/hero.webp'
+import rickyDepth from './textures/hero-depth.webp'
+import rickyMap from './textures/hero.webp'
+import sokhengDepth from './textures/sokheng-depth.webp'
+import sokhengMap from './textures/sokheng.webp'
 
 const MAX_PIXEL_RATIO = 2
 const VIEW_HEIGHT = 4
+const FADE_MS = 500 // keep in sync with the canvas transition in style.css
+
+const people = {
+  ricky: { map: rickyMap, depth: rickyDepth, focusY: 0.5, title: 'Ricky Davan — Product Designer' },
+  // Pinned to the image's bottom edge: on wide windows only spare wall gets cropped, never the body.
+  // wallDepth: keep in sync with WALL_DEPTH in tools/build_studio.py.
+  sokheng: { map: sokhengMap, depth: sokhengDepth, focusY: 0, wallDepth: 0.4, title: 'Soeng Sokheng — Software Developer' },
+}
+
+function showCopy() {
+  const hash = location.hash.slice(1)
+  const id = Object.hasOwn(people, hash) ? hash : 'ricky'
+
+  document.body.dataset.person = id
+  document.title = people[id].title
+  for (const element of document.querySelectorAll('[data-for]')) {
+    element.hidden = element.dataset.for !== id
+  }
+  for (const tab of document.querySelectorAll('#tabs a')) {
+    tab.ariaCurrent = tab.hash === `#${id}` ? 'page' : null
+  }
+  return people[id]
+}
+
+// Before the renderer starts, so the tabs still work if it can't.
+const person = showCopy()
+addEventListener('hashchange', showCopy)
 
 const renderer = new WebGPURenderer({ antialias: true })
 renderer.setPixelRatio(Math.min(devicePixelRatio, MAX_PIXEL_RATIO))
@@ -22,7 +51,7 @@ renderer.toneMapping = AgXToneMapping
 document.getElementById('app').append(renderer.domElement)
 await renderer.init()
 
-await setupTextures({ map, depth })
+await setupTextures(person)
 
 const scene = new Scene()
 scene.background = new Color('#000000')
@@ -59,3 +88,15 @@ renderer.setAnimationLoop((time) => {
 })
 
 document.body.classList.add('ready')
+
+addEventListener('hashchange', async () => {
+  const next = people[document.body.dataset.person]
+  document.body.classList.remove('ready')
+  await Promise.all([
+    setupTextures(next),
+    new Promise((resolve) => setTimeout(resolve, FADE_MS)),
+  ])
+  if (next === people[document.body.dataset.person]) {
+    document.body.classList.add('ready')
+  }
+})

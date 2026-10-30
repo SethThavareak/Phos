@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Ricky Davan — Product Designer</title>
-    <meta name="description" content="Ricky Davan — Product Designer." />
+    <meta name="description" content="Ricky Davan, Product Designer, and Soeng Sokheng, Software Developer." />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -15,20 +15,37 @@
   </head>
   <body>
     <div id="app"></div>
+    <nav id="tabs" aria-label="People">
+      <a href="#ricky">Ricky Davan</a>
+      <a href="#sokheng">Soeng Sokheng</a>
+    </nav>
     <main id="intro">
-      <h1>
-        <span class="khmer" lang="km">ដាវណ្ណ រីកគី</span>
-        Ricky Davan <span class="role">Product Designer</span>
-      </h1>
-      <p class="about">
-        I design digital products that feel clear and considered. It's dark out
-        at Angkor Wat tonight, so bring your own light.
-      </p>
+      <div data-for="ricky" hidden>
+        <h1>
+          <span class="khmer" lang="km">ដាវណ្ណ រីកគី</span>
+          Ricky Davan <span class="role">Product Designer</span>
+        </h1>
+        <p class="about">
+          I design digital products that feel clear and considered. It's dark out
+          at Angkor Wat tonight, so bring your own light.
+        </p>
+      </div>
+      <div data-for="sokheng" hidden>
+        <h1>
+          <span class="khmer" lang="km">សឹង សុខហេង</span>
+          Soeng Sokheng <span class="role">Software Developer</span>
+        </h1>
+        <p class="about">
+          I build software that's reliable and easy to work with. The studio
+          lights are off tonight, so bring your own.
+        </p>
+      </div>
     </main>
     <footer id="foot">
       <span id="hint">Move the light</span>
       <span>
-        Angkor Wat, Siem Reap · Effect by
+        <span data-for="ricky" hidden>Angkor Wat, Siem Reap ·</span>
+        Effect by
         <a href="https://github.com/DGFX/codrops-relightning-images">Dominik Fojcik</a>
       </span>
     </footer>

@@ -1,8 +1,5 @@
 import { Fn, screenSize, screenUV, vec2 } from 'three/tsl'
-import { mapNode } from '../textures.js'
-
-// Where the crop sits when the viewport can't show the whole image: keeps the figure in frame on phones.
-const FOCUS = vec2(0.9, 0.5)
+import { mapNode, uFocus } from '../textures.js'
 
 export const coverScaleNode = Fn(() => {
   const viewAspect = screenSize.x.div(screenSize.y).toVar()
@@ -24,5 +21,5 @@ export const coverUv = Fn(() => {
     .sub(0.5)
     .mul(scale)
     .add(0.5)
-    .add(FOCUS.sub(0.5).mul(scale.oneMinus()))
+    .add(uFocus.sub(0.5).mul(scale.oneMinus()))
 })
