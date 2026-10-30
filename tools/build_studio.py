@@ -18,11 +18,9 @@ CANVAS_W, CANVAS_H = 3200, 1800
 # Scaled to fit, never cropped: the whole body shows, with the head as low as hero.webp's and room above it for phone copy.
 PHOTO_LEFT, PHOTO_TOP = 1974, 320
 WALL = np.array([0.075, 0.080, 0.092], np.float32)  # dark enough that the light has room to climb
-WALL_DEPTH, FIGURE_DEPTH_MIN = 0.4, 0.62  # keep WALL_DEPTH in sync with app.js; plane.js exempts the figure from 0.6 up, the margin absorbs WebP ringing
-# Guessed relief stays gentle: steep relief turns the jaw into a mask edge.
-FIGURE_RELIEF, RELIEF_BLUR = 0.06, 35
-# The form comes from the silhouette instead: a rounded body the light can wrap around, with no facial features to get wrong.
-FIGURE_ROUNDING, ROUNDING_RADIUS, ROUNDING_BLUR = 0.08, 190, 40  # blurred hard: a distance map creases along the body's centre line
+# Flat on purpose: any relief on the figure turned away from side light as dark, hard-edged blotches on the skin.
+WALL_DEPTH, FIGURE_DEPTH = 0.4, 0.64  # keep WALL_DEPTH in sync with app.js; plane.js exempts the figure from 0.6 up
+FIGURE_GAIN, FIGURE_GAMMA = 1.2, 0.75  # a dark shirt and dim skin sink into the wall, so lift the shadows most
 DEPTH_INSET = 8  # canvas px: the shader tilts normals this far either side of a depth edge, so keep that band off the plain wall
 NECK = 0.47  # share of the photo height
 FADE_START, FADE_END = 1067, 2333  # canvas x: wide, or the pool of light ends in a visible edge at the copy area
@@ -33,14 +31,12 @@ def resize(image, interpolation):
 
 
 rgb = np.asarray(Image.open(SRC).convert("RGB"))
-depth = np.load(MAPS / "depth.npy")
 labels = np.load(MAPS / "labels.npy")
 scale = (CANVAS_H - PHOTO_TOP) / rgb.shape[0]
 
 srgb = resize(rgb.astype(np.float32) / 255, cv2.INTER_AREA)
 linear = to_linear(srgb)
-depth = resize(depth, cv2.INTER_CUBIC)
-seg = resize((labels == PERSON).astype(np.uint8), cv2.INTER_NEAREST)
+seg =resize((labels == PERSON).astype(np.uint8), cv2.INTER_NEAREST)
 
 # Masks ---------------------------------------------------------------------
 # Segmentation is coarse at this size, but against a plain wall colour difference gives a crisp edge.
@@ -68,15 +64,15 @@ alpha = cv2.GaussianBlur(person.astype(np.float32), (0, 0), 1.6)
 inside = cv2.erode(person, np.ones((13, 13), np.uint8)).astype(np.float32)
 inside_soft = cv2.GaussianBlur(inside, (0, 0), 2)[..., None]
 figure = linear * inside_soft + masked_blur(linear, inside[..., None].repeat(3, 2), 6) * (1 - inside_soft)
+# Scaled by luminance rather than per channel, so skin keeps its colour; the toe keeps black hair from turning grey.
+figure_lum = np.maximum(figure @ np.array([0.2126, 0.7152, 0.0722], np.float32), 1e-4)[..., None]
+lift = FIGURE_GAIN * figure_lum ** (FIGURE_GAMMA - 1)
+figure = figure * (1 + (lift - 1) * smoothstep(0.012, 0.04, figure_lum))
 
 # Depth ---------------------------------------------------------------------
-low, high = np.percentile(depth[inside > 0], [2, 98])
-relief = masked_blur(np.clip((depth - low) / (high - low), 0, 1), person.astype(np.float32), RELIEF_BLUR)
-rounding = np.sqrt(np.clip(cv2.distanceTransform(person, cv2.DIST_L2, 5) / ROUNDING_RADIUS, 0, 1))
-rounding = masked_blur(rounding, person.astype(np.float32), ROUNDING_BLUR)
-inset =cv2.erode(person, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * DEPTH_INSET + 1,) * 2))
+inset = cv2.erode(person, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * DEPTH_INSET + 1,) * 2))
 inset_alpha = cv2.GaussianBlur(inset.astype(np.float32), (0, 0), 1.6)
-shaped = WALL_DEPTH * (1 - inset_alpha) + (FIGURE_DEPTH_MIN + FIGURE_RELIEF * relief + FIGURE_ROUNDING * rounding) * inset_alpha
+shaped = WALL_DEPTH * (1 - inset_alpha) + FIGURE_DEPTH * inset_alpha
 
 # Composition ---------------------------------------------------------------
 photo_h, photo_w = alpha.shape
