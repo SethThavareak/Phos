@@ -10,6 +10,8 @@ import { createPlane } from './effect/plane.js'
 import { setupTextures } from './effect/textures.js'
 import rickyDepth from './textures/hero-depth.webp'
 import rickyMap from './textures/hero.webp'
+import sethDepth from './textures/seth-depth.webp'
+import sethMap from './textures/seth.webp'
 import sokhengDepth from './textures/sokheng-depth.webp'
 import sokhengMap from './textures/sokheng.webp'
 import taxzyDepth from './textures/taxzy-depth.webp'
@@ -28,6 +30,8 @@ const people = {
   sokheng: { map: sokhengMap, depth: sokhengDepth, focusY: 0, wallDepth: 0.4, title: 'Soeng Sokheng — Software Developer' },
   taxzy: { map: taxzyMap, depth: taxzyDepth, focusY: 0, wallDepth: 0.4, title: 'Taxzy — Product Developer' },
   zhampt: { map: zhamptMap, depth: zhamptDepth, focusY: 0, wallDepth: 0.4, title: 'Zhampt — Husband' },
+  // focusX keeps a figure left of the frame in view on phones.
+  seth: { map: sethMap, depth: sethDepth, focusX: 0.82, focusY: 0, wallDepth: 0.4, title: 'Seth Thavareak' },
 }
 
 function showCopy() {
@@ -41,6 +45,7 @@ function showCopy() {
   }
   for (const tab of document.querySelectorAll('#tabs a')) {
     tab.ariaCurrent = tab.hash === `#${id}` ? 'page' : null
+    if (tab.ariaCurrent) tab.scrollIntoView({ block: 'nearest', inline: 'nearest' })
   }
   return people[id]
 }

@@ -1,6 +1,6 @@
 # Intro pages
 
-One-screen intros behind tabs, each a photo reworked into a night scene that a moving light relights: Ricky Davan at Angkor Wat, Soeng Sokheng against a dark studio wall, Taxzy under a wooden gate and Zhampt in a dark room. Link to a tab with `#ricky`, `#sokheng`, `#taxzy` or `#zhampt`.
+One-screen intros behind tabs, each a photo reworked into a night scene that a moving light relights: Ricky Davan at Angkor Wat, Soeng Sokheng against a dark studio wall, Taxzy under a wooden gate, Zhampt in a dark room and Seth Thavareak at the Great Buddha. Link to a tab with `#ricky`, `#sokheng`, `#taxzy`, `#zhampt` or `#seth`.
 
 ```bash
 npm install
@@ -28,6 +28,11 @@ python tools/build_night.py photo_taxzy.jpg maps/taxzy src/textures taxzy 0 0 0.
 ```bash
 python tools/masks.py photo_zhampt.jpg maps/zhampt
 python tools/build_night.py photo_zhampt.jpg maps/zhampt src/textures zhampt 0 9 0.4
+```
+
+```bash
+python tools/masks.py photo_seth.jpg maps/seth
+python tools/build_night.py photo_seth.jpg maps/seth src/textures seth 0 0 0.4
 ```
 
 ```bash

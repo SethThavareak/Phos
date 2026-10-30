@@ -13,7 +13,7 @@ const loader = new TextureLoader()
 
 let latestRequest = 0
 
-export async function setupTextures({ map, depth, focusY, wallDepth = 0 }) {
+export async function setupTextures({ map, depth, focusX = 0.9, focusY, wallDepth = 0 }) {
   const request = ++latestRequest
   const [mapTexture, depthTexture] = await Promise.all([
     loader.loadAsync(map),
@@ -32,6 +32,6 @@ export async function setupTextures({ map, depth, focusY, wallDepth = 0 }) {
   depthNode.value.dispose()
   depthNode.value = depthTexture
   setDepthImage(depthTexture.image)
-  uFocus.value.y = focusY
+  uFocus.value.set(focusX, focusY)
   uWallDepth.value = wallDepth
 }
