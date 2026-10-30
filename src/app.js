@@ -8,6 +8,8 @@ import {
 import { setupLight, updateLight } from './effect/light.js'
 import { createPlane } from './effect/plane.js'
 import { setupTextures } from './effect/textures.js'
+import depth from './textures/hero-depth.webp'
+import map from './textures/hero.webp'
 
 const MAX_PIXEL_RATIO = 2
 const VIEW_HEIGHT = 4
@@ -20,10 +22,7 @@ renderer.toneMapping = AgXToneMapping
 document.getElementById('app').append(renderer.domElement)
 await renderer.init()
 
-await setupTextures({
-  map: 'textures/hero.webp',
-  depth: 'textures/hero-depth.webp',
-})
+await setupTextures({ map, depth })
 
 const scene = new Scene()
 scene.background = new Color('#000000')

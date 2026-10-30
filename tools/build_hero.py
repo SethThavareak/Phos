@@ -90,6 +90,9 @@ lum = srgb @ np.array([0.2126, 0.7152, 0.0722], np.float32)
 near_sky = cv2.dilate(((labels == SKY) | (depth < 0.05)).astype(np.uint8), np.ones((9, 9), np.uint8))
 sky = smoothstep(0.24, 0.4, lum) * near_sky * (1 - person)  # full-res luminance matte keeps the palm fronds
 sky[depth > 0.2] = 0
+# Depth undershoots beside the hair, so bright stone there passes as sky; the figure never touches real sky.
+near_figure = cv2.dilate((person > 0.5).astype(np.uint8), cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (21, 21)))
+sky[near_figure > 0] = 0
 sky = cv2.GaussianBlur(sky, (0, 0), 0.8)  # anti-alias the matte, it comes from a low-quality JPEG
 
 # Depth ---------------------------------------------------------------------
@@ -154,6 +157,9 @@ OUT.mkdir(parents=True, exist_ok=True)
 hero = (to_srgb(canvas) * 255 + 0.5).astype(np.uint8)
 Image.fromarray(hero).save(OUT / "hero.webp", quality=88, method=6)
 Image.fromarray((np.clip(canvas_depth, 0, 1) * 255 + 0.5).astype(np.uint8)).save(OUT / "hero-depth.webp", quality=95, method=6)
+
+figure_canvas = cv2.resize(near_figure[CROP_TOP:CROP_BOTTOM], (width, CANVAS_H), interpolation=cv2.INTER_NEAREST)
+assert not (canvas_depth[:, CANVAS_W - width :] < SKY_DEPTH)[figure_canvas > 0].any(), "figure edge fell into the sky glow band"
 
 # Checked on the decoded files, since that's what the shader sees after lossy compression.
 saved = to_linear(np.asarray(Image.open(OUT / "hero.webp").convert("RGB"), np.float32) / 255)

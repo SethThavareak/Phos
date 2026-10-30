@@ -15,7 +15,7 @@ Only needed if the source photo changes (the original is not in this repo). Need
 
 ```bash
 python tools/masks.py photo_2026-10-30_16-24-59.jpg maps
-python tools/build_hero.py photo_2026-10-30_16-24-59.jpg maps public/textures
+python tools/build_hero.py photo_2026-10-30_16-24-59.jpg maps src/textures
 ```
 
 ## Credits
