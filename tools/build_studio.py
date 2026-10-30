@@ -20,8 +20,6 @@ PHOTO_LEFT, PHOTO_TOP = 1974, 320
 WALL = np.array([0.075, 0.080, 0.092], np.float32)  # dark enough that the light has room to climb
 # Flat on purpose: any relief on the figure turned away from side light as dark, hard-edged blotches on the skin.
 WALL_DEPTH, FIGURE_DEPTH = 0.4, 0.64  # keep WALL_DEPTH in sync with app.js; plane.js exempts the figure from 0.6 up
-FIGURE_GAIN, FIGURE_GAMMA = 1.2, 0.75  # a dark shirt and dim skin sink into the wall, so lift the shadows most
-DEPTH_INSET = 8  # canvas px: the shader tilts normals this far either side of a depth edge, so keep that band off the plain wall
 NECK = 0.47  # share of the photo height
 FADE_START, FADE_END = 1067, 2333  # canvas x: wide, or the pool of light ends in a visible edge at the copy area
 
@@ -36,7 +34,7 @@ scale = (CANVAS_H - PHOTO_TOP) / rgb.shape[0]
 
 srgb = resize(rgb.astype(np.float32) / 255, cv2.INTER_AREA)
 linear = to_linear(srgb)
-seg =resize((labels == PERSON).astype(np.uint8), cv2.INTER_NEAREST)
+seg = resize((labels == PERSON).astype(np.uint8), cv2.INTER_NEAREST)
 
 # Masks ---------------------------------------------------------------------
 # Segmentation is coarse at this size, but against a plain wall colour difference gives a crisp edge.
@@ -57,22 +55,19 @@ _, components = cv2.connectedComponents((matte > 0.5).astype(np.uint8))
 sizes = np.bincount(components.ravel())[1:]
 person = (components == 1 + sizes.argmax()).astype(np.uint8)
 person = cv2.morphologyEx(person, cv2.MORPH_CLOSE, np.ones((5, 5), np.uint8))
-alpha = cv2.GaussianBlur(person.astype(np.float32), (0, 0), 1.6)
+# The matte's threshold still keeps pixels that are mostly wall, which show as a pale line on the dark wall.
+person = cv2.erode(person, np.ones((3, 3), np.uint8))
+alpha = cv2.GaussianBlur(person.astype(np.float32), (0, 0), 1.2)
 
 # Plate ---------------------------------------------------------------------
-# The edge pixels still hold bright wall; refill them from inside or they turn into a halo on the dark wall.
-inside = cv2.erode(person, np.ones((13, 13), np.uint8)).astype(np.float32)
-inside_soft = cv2.GaussianBlur(inside, (0, 0), 2)[..., None]
-figure = linear * inside_soft + masked_blur(linear, inside[..., None].repeat(3, 2), 6) * (1 - inside_soft)
-# Scaled by luminance rather than per channel, so skin keeps its colour; the toe keeps black hair from turning grey.
-figure_lum = np.maximum(figure @ np.array([0.2126, 0.7152, 0.0722], np.float32), 1e-4)[..., None]
-lift = FIGURE_GAIN * figure_lum ** (FIGURE_GAMMA - 1)
-figure = figure * (1 + (lift - 1) * smoothstep(0.012, 0.04, figure_lum))
+# Only the thin fringe still holding wall colour is refilled: a wider band reads as smeared skin around the outline.
+inside = cv2.erode(person, np.ones((5, 5), np.uint8)).astype(np.float32)
+inside_soft = cv2.GaussianBlur(inside, (0, 0), 1)[..., None]
+figure = linear * inside_soft + masked_blur(linear, inside[..., None].repeat(3, 2), 2) * (1 - inside_soft)
 
 # Depth ---------------------------------------------------------------------
-inset = cv2.erode(person, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * DEPTH_INSET + 1,) * 2))
-inset_alpha = cv2.GaussianBlur(inset.astype(np.float32), (0, 0), 1.6)
-shaped = WALL_DEPTH * (1 - inset_alpha) + FIGURE_DEPTH * inset_alpha
+# Matches the colour edge exactly: any figure pixel left at wall depth catches the wall's shadow.
+shaped = WALL_DEPTH * (1 - alpha) + FIGURE_DEPTH * alpha
 
 # Composition ---------------------------------------------------------------
 photo_h, photo_w = alpha.shape
@@ -96,7 +91,7 @@ saved_depth = np.asarray(Image.open(OUT / "sokheng-depth.webp").convert("L"), np
 assert saved_depth.min() >= 0.12, "only sky may fall into the plane.js glow band"
 assert hero.shape == (CANVAS_H, CANVAS_W, 3) and hero[:, :40].max() == 0, "copy area must stay black"
 figure_core = np.zeros((CANVAS_H, CANVAS_W), np.uint8)
-figure_core[region] = cv2.erode(inset, np.ones((13, 13), np.uint8))
+figure_core[region] = cv2.erode(person, np.ones((9, 9), np.uint8))
 figure_floor = saved_depth[figure_core > 0].min()
 assert figure_floor >= 0.6, f"figure would pick up guessed self-shadow: depth {figure_floor:.3f}"
 for name in ("sokheng.webp", "sokheng-depth.webp"):

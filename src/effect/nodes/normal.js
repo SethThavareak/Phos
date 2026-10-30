@@ -8,7 +8,7 @@ import {
   vec3,
 } from 'three/tsl'
 import { smoothDepthNode } from '../depth-map.js'
-import { mapNode } from '../textures.js'
+import { mapNode, uWallDepth } from '../textures.js'
 import { coverScaleNode } from './texture-fit.js'
 
 export const uDisplacementScale = uniform(1)
@@ -66,5 +66,11 @@ export const normalNode = Fn(([vUv]) => {
 
   const shape = vec3(slope.x.negate(), slope.y.negate(), float(1))
 
-  return shape.add(vec3(detail.x.negate(), detail.y.negate(), 0)).normalize()
+  // A flat cutout has no shape to shade: its only depth edge is the outline, which would turn into a false band.
+  return uWallDepth
+    .greaterThan(0)
+    .select(
+      vec3(0, 0, 1),
+      shape.add(vec3(detail.x.negate(), detail.y.negate(), 0)).normalize(),
+    )
 })
