@@ -25,6 +25,11 @@ body {
   background-position: 90% 100%;
 }
 
+[data-person="taxzy"] #app {
+  background-image: url("./textures/taxzy.webp");
+  background-position: 90% 100%;
+}
+
 #app::after {
   content: "";
   position: absolute;
@@ -96,6 +101,18 @@ h1 {
   font-size: 1.8em;
   line-height: 1.6;
   letter-spacing: 0;
+}
+
+/* Stands in for the Khmer line when a name doesn't have one. */
+.headline {
+  display: block;
+  margin-bottom: 0.1em;
+  font-size: 1.8em;
+  line-height: 1.1;
+}
+
+.headline + .role {
+  margin-left: 0;
 }
 
 .role {

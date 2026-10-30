@@ -14,18 +14,18 @@ from tone import masked_blur, smoothstep, to_linear, to_srgb
 SRC, MAPS, OUT = Path(sys.argv[1]), Path(sys.argv[2]), Path(sys.argv[3])
 PERSON = 12  # ADE20K id
 
-CANVAS_W, CANVAS_H = 2400, 1350
+CANVAS_W, CANVAS_H = 3200, 1800
 # Scaled to fit, never cropped: the whole body shows, with the head as low as hero.webp's and room above it for phone copy.
-PHOTO_LEFT, PHOTO_TOP = 1447, 390
+PHOTO_LEFT, PHOTO_TOP = 1974, 320
 WALL = np.array([0.075, 0.080, 0.092], np.float32)  # dark enough that the light has room to climb
 WALL_DEPTH, FIGURE_DEPTH_MIN = 0.4, 0.62  # keep WALL_DEPTH in sync with app.js; plane.js exempts the figure from 0.6 up, the margin absorbs WebP ringing
 # Guessed relief stays gentle: steep relief turns the jaw into a mask edge.
-FIGURE_RELIEF, RELIEF_BLUR = 0.06, 30
+FIGURE_RELIEF, RELIEF_BLUR = 0.06, 35
 # The form comes from the silhouette instead: a rounded body the light can wrap around, with no facial features to get wrong.
-FIGURE_ROUNDING, ROUNDING_RADIUS, ROUNDING_BLUR = 0.08, 160, 34  # blurred hard: a distance map creases along the body's centre line
-DEPTH_INSET = 6  # canvas px: the shader tilts normals this far either side of a depth edge, so keep that band off the plain wall
+FIGURE_ROUNDING, ROUNDING_RADIUS, ROUNDING_BLUR = 0.08, 190, 40  # blurred hard: a distance map creases along the body's centre line
+DEPTH_INSET = 8  # canvas px: the shader tilts normals this far either side of a depth edge, so keep that band off the plain wall
 NECK = 0.47  # share of the photo height
-FADE_START, FADE_END = 800, 1750  # canvas x: wide, or the pool of light ends in a visible edge at the copy area
+FADE_START, FADE_END = 1067, 2333  # canvas x: wide, or the pool of light ends in a visible edge at the copy area
 
 
 def resize(image, interpolation):
@@ -37,9 +37,7 @@ depth = np.load(MAPS / "depth.npy")
 labels = np.load(MAPS / "labels.npy")
 scale = (CANVAS_H - PHOTO_TOP) / rgb.shape[0]
 
-# shortcut: plain Lanczos on a 400px source, swap in a larger original or a super-resolution pass if the face reads soft
-smooth = cv2.fastNlMeansDenoisingColored(rgb, None, 2, 4, 5, 15)
-srgb = np.clip(resize(smooth.astype(np.float32) / 255, cv2.INTER_LANCZOS4), 0, 1)
+srgb = resize(rgb.astype(np.float32) / 255, cv2.INTER_AREA)
 linear = to_linear(srgb)
 depth = resize(depth, cv2.INTER_CUBIC)
 seg = resize((labels == PERSON).astype(np.uint8), cv2.INTER_NEAREST)
@@ -81,14 +79,13 @@ inset_alpha = cv2.GaussianBlur(inset.astype(np.float32), (0, 0), 1.6)
 shaped = WALL_DEPTH * (1 - inset_alpha) + (FIGURE_DEPTH_MIN + FIGURE_RELIEF * relief + FIGURE_ROUNDING * rounding) * inset_alpha
 
 # Composition ---------------------------------------------------------------
-photo_h, photo_w = CANVAS_H - PHOTO_TOP, CANVAS_W - PHOTO_LEFT
+photo_h, photo_w = alpha.shape
 fade = smoothstep(FADE_START, FADE_END, np.arange(CANVAS_W, dtype=np.float32))[None, :, None]
 canvas = np.ones((CANVAS_H, CANVAS_W, 3), np.float32) * WALL * fade
 canvas_depth = np.full((CANVAS_H, CANVAS_W), WALL_DEPTH, np.float32)
-region = (slice(PHOTO_TOP, CANVAS_H), slice(PHOTO_LEFT, CANVAS_W))
-photo_alpha = alpha[: photo_h, : photo_w, None]
-canvas[region] = canvas[region] * (1 - photo_alpha) + figure[: photo_h, : photo_w] * photo_alpha
-canvas_depth[region] = shaped[: photo_h, : photo_w]
+region = (slice(PHOTO_TOP, CANVAS_H), slice(PHOTO_LEFT, PHOTO_LEFT + photo_w))
+canvas[region] = canvas[region] * (1 - alpha[..., None]) + figure * alpha[..., None]
+canvas_depth[region] = shaped
 
 OUT.mkdir(parents=True, exist_ok=True)
 # Dithered: a fade this slow spans few 8-bit levels, which show as vertical stripes once the light multiplies them.
@@ -103,7 +100,7 @@ saved_depth = np.asarray(Image.open(OUT / "sokheng-depth.webp").convert("L"), np
 assert saved_depth.min() >= 0.12, "only sky may fall into the plane.js glow band"
 assert hero.shape == (CANVAS_H, CANVAS_W, 3) and hero[:, :40].max() == 0, "copy area must stay black"
 figure_core = np.zeros((CANVAS_H, CANVAS_W), np.uint8)
-figure_core[region] = cv2.erode(inset, np.ones((13, 13), np.uint8))[: photo_h, : photo_w]
+figure_core[region] = cv2.erode(inset, np.ones((13, 13), np.uint8))
 figure_floor = saved_depth[figure_core > 0].min()
 assert figure_floor >= 0.6, f"figure would pick up guessed self-shadow: depth {figure_floor:.3f}"
 for name in ("sokheng.webp", "sokheng-depth.webp"):

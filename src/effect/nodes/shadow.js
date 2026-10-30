@@ -24,7 +24,7 @@ const SOFTNESS_GROWTH = 3
 const FIGURE_STANDOFF = 0.3 // how far the figure stands off the wall
 const FIGURE_EDGE = 0.22 // depth from the wall to the figure's edge
 const CUTOUT_SHADOW_INTENSITY = 0.82
-const PENUMBRA_LOD = 4.5
+const PENUMBRA_LOD = 4.9
 const PENUMBRA_GROWTH = 1.2
 const PENUMBRA_TAP = 0.012
 
@@ -37,7 +37,7 @@ const cutoutShadowNode = Fn(([vUv, depth]) => {
   const reach = surfaceToLight.xy
     .div(surfaceToLight.z.max(MIN_LIGHT_ANGLE))
     .mul(FIGURE_STANDOFF)
-  const lod = float(PENUMBRA_LOD).add(reach.length().mul(PENUMBRA_GROWTH)).min(6.5)
+  const lod = float(PENUMBRA_LOD).add(reach.length().mul(PENUMBRA_GROWTH)).min(6.9)
   const center = vUv.add(reach.mul(coverScaleNode()).div(modelScale.xy))
 
   // Four taps hide the blocky mips.

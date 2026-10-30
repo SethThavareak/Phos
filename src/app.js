@@ -12,6 +12,8 @@ import rickyDepth from './textures/hero-depth.webp'
 import rickyMap from './textures/hero.webp'
 import sokhengDepth from './textures/sokheng-depth.webp'
 import sokhengMap from './textures/sokheng.webp'
+import taxzyDepth from './textures/taxzy-depth.webp'
+import taxzyMap from './textures/taxzy.webp'
 
 const MAX_PIXEL_RATIO = 2
 const VIEW_HEIGHT = 4
@@ -19,9 +21,10 @@ const FADE_MS = 500 // keep in sync with the canvas transition in style.css
 
 const people = {
   ricky: { map: rickyMap, depth: rickyDepth, focusY: 0.5, title: 'Ricky Davan — Product Designer' },
-  // Pinned to the image's bottom edge: on wide windows only spare wall gets cropped, never the body.
+  // focusY 0 pins these to the image's bottom edge: on wide windows only what's above the head gets cropped, never the body.
   // wallDepth: keep in sync with WALL_DEPTH in tools/build_studio.py.
   sokheng: { map: sokhengMap, depth: sokhengDepth, focusY: 0, wallDepth: 0.4, title: 'Soeng Sokheng — Software Developer' },
+  taxzy: { map: taxzyMap, depth: taxzyDepth, focusY: 0, title: 'Taxzy — Product Developer' },
 }
 
 function showCopy() {
