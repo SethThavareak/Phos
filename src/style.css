@@ -30,6 +30,11 @@ body {
   background-position: 90% 100%;
 }
 
+[data-person="zhampt"] #app {
+  background-image: url("./textures/zhampt.webp");
+  background-position: 90% 100%;
+}
+
 #app::after {
   content: "";
   position: absolute;

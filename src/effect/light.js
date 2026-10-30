@@ -39,8 +39,13 @@ export function updateLight(time, camera) {
     ? 0.1 + 0.3 * sway * Math.sin(time * 0.00063)
     : pointer.y
 
+  const worldX = targetX * camera.right
+  const worldY = targetY * camera.top
+  // A zero-size window divides by zero, and easing would keep that NaN forever.
+  if (!Number.isFinite(worldX) || !Number.isFinite(worldY)) return
+
   const ease = REDUCED_MOTION ? 1 : FOLLOW_EASE
   const { position } = pointLight
-  position.x += (targetX * camera.right - position.x) * ease
-  position.y += (targetY * camera.top - position.y) * ease
+  position.x += (worldX - position.x) * ease
+  position.y += (worldY - position.y) * ease
 }

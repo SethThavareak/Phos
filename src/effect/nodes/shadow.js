@@ -22,7 +22,7 @@ const MIN_LIGHT_ANGLE = 0.15
 const SOFTNESS_GROWTH = 3
 
 const FIGURE_STANDOFF = 0.3 // how far the figure stands off the wall
-const FIGURE_EDGE = 0.22 // depth from the wall to the figure's edge
+export const FIGURE_EDGE = 0.22 // depth from the wall to the figure's edge
 const CUTOUT_SHADOW_INTENSITY = 0.82
 const PENUMBRA_LOD = 4.9
 const PENUMBRA_GROWTH = 1.2

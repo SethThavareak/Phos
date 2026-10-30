@@ -7,3 +7,4 @@ maps
 photo_*.jpg
 *.HEIC
 DSC*.jpg
+[0-9]*.jpg
