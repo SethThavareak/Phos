@@ -37,7 +37,7 @@ body {
 
 [data-person="seth"] #app {
   background-image: url("./textures/seth.webp");
-  background-position: 69% 50%;
+  background-position: 88% 100%;
 }
 
 #app::after {

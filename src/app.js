@@ -30,8 +30,8 @@ const people = {
   sokheng: { map: sokhengMap, depth: sokhengDepth, focusY: 0, wallDepth: 0.4, title: 'Soeng Sokheng — Software Developer' },
   taxzy: { map: taxzyMap, depth: taxzyDepth, focusY: 0, wallDepth: 0.4, title: 'Taxzy — Product Developer' },
   zhampt: { map: zhamptMap, depth: zhamptDepth, focusY: 0, wallDepth: 0.4, title: 'Zhampt — Husband' },
-  // focusX keeps a figure left of the frame in view on phones; focusY 0.5 because the statue's head is near the top.
-  seth: { map: sethMap, depth: sethDepth, focusX: 0.69, focusY: 0.5, wallDepth: 0.4, title: 'Seth Thavareak' },
+  // focusX centres him on phones.
+  seth: { map: sethMap, depth: sethDepth, focusX: 0.88, focusY: 0, wallDepth: 0.4, title: 'Seth Thavareak' },
 }
 
 function showCopy() {
