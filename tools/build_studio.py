@@ -55,6 +55,11 @@ _, components = cv2.connectedComponents((matte > 0.5).astype(np.uint8))
 sizes = np.bincount(components.ravel())[1:]
 person = (components == 1 + sizes.argmax()).astype(np.uint8)
 person = cv2.morphologyEx(person, cv2.MORPH_CLOSE, np.ones((5, 5), np.uint8))
+# Closing seals the tips of the gaps back in, so clear wall from the outline after it; the reach catches the thin ends.
+# Brighter than the wallish test: a fold in the grey shirt comes close enough to bite the sleeve.
+near_edge = person - cv2.erode(person, ellipse) > 0
+pale = (srgb.mean(2) > 0.55) & (srgb.max(2) - srgb.min(2) < 0.08) & (core == 0)
+person[(cv2.dilate(pale.astype(np.uint8), np.ones((3, 3), np.uint8)) > 0) & near_edge] = 0
 # The matte's threshold still keeps pixels that are mostly wall, which show as a pale line on the dark wall.
 person = cv2.erode(person, np.ones((3, 3), np.uint8))
 alpha = cv2.GaussianBlur(person.astype(np.float32), (0, 0), 1.2)

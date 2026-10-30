@@ -26,7 +26,7 @@ const people = {
   // focusY 0 pins these to the image's bottom edge: on wide windows only what's above the head gets cropped, never the body.
   // wallDepth: keep in sync with the depth each image was built with in tools/.
   sokheng: { map: sokhengMap, depth: sokhengDepth, focusY: 0, wallDepth: 0.4, title: 'Soeng Sokheng — Software Developer' },
-  taxzy: { map: taxzyMap, depth: taxzyDepth, focusY: 0, title: 'Taxzy — Product Developer' },
+  taxzy: { map: taxzyMap, depth: taxzyDepth, focusY: 0, wallDepth: 0.4, title: 'Taxzy — Product Developer' },
   zhampt: { map: zhamptMap, depth: zhamptDepth, focusY: 0, wallDepth: 0.4, title: 'Zhampt — Husband' },
 }
 

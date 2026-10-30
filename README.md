@@ -20,7 +20,7 @@ python tools/build_hero.py photo_2026-10-30_16-24-59.jpg maps src/textures
 
 ```bash
 python tools/masks.py photo_taxzy.jpg maps/taxzy
-python tools/build_night.py photo_taxzy.jpg maps/taxzy src/textures taxzy
+python tools/build_night.py photo_taxzy.jpg maps/taxzy src/textures taxzy 0 0 0.4
 ```
 
 `photo_taxzy.jpg` is the HEIC original at 1350×1800.

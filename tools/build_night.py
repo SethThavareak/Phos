@@ -61,6 +61,12 @@ if SEG_INSET:  # keeps what the depth edge can't separate, like a bare foot on t
 person = largest(person)
 person = cv2.morphologyEx(person, cv2.MORPH_CLOSE, ellipse(9))
 if WALL_DEPTH:
+    # The gaps between limbs let pale ground through; the top half is spared for eye whites and whatever he's holding.
+    pale = smoothstep(0.45, 0.55, lum) * (1 - smoothstep(0.05, 0.1, srgb.max(2) - srgb.min(2))) > 0.3
+    pale[: height // 2] = False
+    pale = cv2.dilate(pale.astype(np.uint8), np.ones((3, 3), np.uint8)) > 0  # the reach catches a gap's thin ends
+    person[pale & (person - cv2.erode(person, ellipse(25)) > 0)] = 0
+    person = largest(person)
     person = cv2.erode(person, np.ones((3, 3), np.uint8))  # pixels that are mostly wall show as a pale line
 alpha = cv2.GaussianBlur(person.astype(np.float32), (0, 0), 1.2)
 inside = cv2.erode(person, ellipse(9)).astype(np.float32)
@@ -87,7 +93,7 @@ shaped = shaped * (1 - alpha) + figure * alpha
 # The shader makes depth below SKY_DEPTH glow, so only real sky may sit under it.
 shaped = np.clip(np.maximum(shaped, MIN_SURFACE_DEPTH) * (1 - sky), 0, 1)
 if WALL_DEPTH:
-    shaped = WALL_DEPTH * (1 - alpha) + FIGURE_DEPTH_MIN * alpha
+    shaped = (WALL_DEPTH * (1 - alpha) + FIGURE_DEPTH_MIN * alpha) * (1 - sky)
 
 # Plate ---------------------------------------------------------------------
 linear = to_linear(srgb)
