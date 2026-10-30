@@ -16,6 +16,8 @@ SKY, PERSON = 2, 12  # ADE20K ids
 
 CANVAS_W, CANVAS_H = 2400, 1350
 CROP_TOP, CROP_BOTTOM = 120, 1240  # trim empty sky and the waist-down
+MIN_SURFACE_DEPTH, SKY_DEPTH = 0.12, 0.06  # keep SKY_DEPTH in sync with plane.js
+MAX_SKY_LUM = 0.03  # brightest the night sky may be before the glow turns it white
 LEFT_FADE = 0.4  # share of the photo width that melts into the dark copy area
 
 
@@ -86,7 +88,7 @@ person = cv2.GaussianBlur(person, (0, 0), 1.2)
 srgb = rgb.astype(np.float32) / 255
 lum = srgb @ np.array([0.2126, 0.7152, 0.0722], np.float32)
 near_sky = cv2.dilate(((labels == SKY) | (depth < 0.05)).astype(np.uint8), np.ones((9, 9), np.uint8))
-sky = smoothstep(0.34, 0.5, lum) * near_sky * (1 - person)  # full-res luminance matte keeps the palm fronds
+sky = smoothstep(0.24, 0.4, lum) * near_sky * (1 - person)  # full-res luminance matte keeps the palm fronds
 sky[depth > 0.2] = 0
 sky = cv2.GaussianBlur(sky, (0, 0), 0.8)  # anti-alias the matte, it comes from a low-quality JPEG
 
@@ -109,8 +111,12 @@ depth = depth * (1 - background) + closed * background
 
 # Compressed on purpose: a big subject-to-backdrop jump renders as a black outline.
 shaped = 0.75 * depth ** 0.6
-shaped += temple_detail * far * 0.4 + person_detail * near * 0.24 + face_detail * near * 0.08
-shaped = np.clip(shaped * (1 - sky), 0, 1)
+# Eroded and clamped: detail spikes on the silhouette can otherwise push the figure's edge down to sky depth.
+core = cv2.erode(near, np.ones((9, 9), np.uint8))
+shaped += temple_detail.clip(-0.1, 0.1) * far * 0.4
+shaped += (person_detail.clip(-0.1, 0.1) * 0.24 + face_detail.clip(-0.1, 0.1) * 0.08) * core
+# The shader makes depth below SKY_DEPTH glow, so only real sky may sit under it.
+shaped = np.clip(np.maximum(shaped, MIN_SURFACE_DEPTH) * (1 - sky), 0, 1)
 
 # Plate ---------------------------------------------------------------------
 smooth = cv2.fastNlMeansDenoisingColored(rgb, None, 2, 4, 5, 15).astype(np.float32) / 255
@@ -121,8 +127,10 @@ linear = linear * (1 - far_soft) + lifted * far_soft
 linear = linear * (1 - person[..., None]) * 0.8 + linear * person[..., None]
 
 clouds = smoothstep(0.42, 0.82, lum)[..., None]
-night = np.array([0.0026, 0.0040, 0.0105], np.float32) * (1 - clouds) + np.array([0.0105, 0.0135, 0.0245], np.float32) * clouds
-plate = linear * (1 - sky[..., None]) + night * sky[..., None]
+night_top = np.array([0.0105, 0.0135, 0.0245], np.float32)
+night = np.array([0.0026, 0.0040, 0.0105], np.float32) * (1 - clouds) + night_top * clouds
+# Squared so sky-coloured fringe pixels on silhouettes don't survive into the glow.
+plate = linear * (1 - sky[..., None]) ** 2 + night * sky[..., None]
 
 # Composition ---------------------------------------------------------------
 plate = plate[CROP_TOP:CROP_BOTTOM]
@@ -138,11 +146,21 @@ canvas_depth = np.zeros((CANVAS_H, CANVAS_W), np.float32)
 canvas[:, CANVAS_W - width :] = plate * fade[..., None]
 canvas_depth[:, CANVAS_W - width :] = shaped  # only the colour fades: a depth ramp would cast a shadow wall
 
+# Resizing nudges colour and depth apart by a pixel; whatever lands in the glow band must be no brighter than sky.
+band = canvas_depth < SKY_DEPTH
+canvas[band] = np.minimum(canvas[band], night_top)
+
 OUT.mkdir(parents=True, exist_ok=True)
 hero = (to_srgb(canvas) * 255 + 0.5).astype(np.uint8)
 Image.fromarray(hero).save(OUT / "hero.webp", quality=88, method=6)
 Image.fromarray((np.clip(canvas_depth, 0, 1) * 255 + 0.5).astype(np.uint8)).save(OUT / "hero-depth.webp", quality=95, method=6)
 
+# Checked on the decoded files, since that's what the shader sees after lossy compression.
+saved = to_linear(np.asarray(Image.open(OUT / "hero.webp").convert("RGB"), np.float32) / 255)
+saved_depth = np.asarray(Image.open(OUT / "hero-depth.webp").convert("L"), np.float32) / 255
+# Same falloff as the shader's depth.smoothstep(SKY_DEPTH, 0).
+glowing = (saved @ np.array([0.2126, 0.7152, 0.0722], np.float32)) * (1 - smoothstep(0, SKY_DEPTH, saved_depth))
+assert glowing.max() <= MAX_SKY_LUM, f"non-sky pixels would glow: {int((glowing > MAX_SKY_LUM).sum())} over limit, max {glowing.max():.3f}"
 assert hero.shape == (CANVAS_H, CANVAS_W, 3) and hero[:, :40].max() == 0, "copy area must stay black"
 for name in ("hero.webp", "hero-depth.webp"):
     print(name, (OUT / name).stat().st_size // 1024, "KB")
