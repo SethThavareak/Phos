@@ -1,0 +1,7 @@
+node_modules
+dist
+.claude
+maps
+
+# The site only needs the processed night plate; the original photo stays local.
+photo_*.jpg
