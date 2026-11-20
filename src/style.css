@@ -133,6 +133,16 @@ h1 {
   color: rgb(243 236 225 / 82%);
 }
 
+.product { white-space: nowrap; }
+.product img {
+  width: 0.9em; height: 0.9em;          /* scales with .role clamp(22px,2vw,30px) */
+  margin: 0 0.22em 0 0.1em;
+  vertical-align: -0.1em;               /* sits on the cap line of Instrument Serif */
+  border-radius: 22%;                    /* matches the tile's own rounding */
+  filter: drop-shadow(0 0 8px rgb(0 0 0 / 60%)); /* text-shadow doesn't reach images */
+}
+.product:focus-visible { outline: 1px solid #ffcb8f; outline-offset: 4px; border-radius: 4px; }
+
 .about {
   max-width: 30em;
   margin: 16px 0 0;
