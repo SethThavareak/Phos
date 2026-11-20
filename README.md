@@ -1,6 +1,6 @@
 # Intro pages
 
-One-screen intros behind tabs, each a photo reworked into a night scene that a moving light relights: Ricky Davan at Angkor Wat, Soeng Sokheng against a dark studio wall, Taxzy under a wooden gate, Zhampt in a dark room and Seth Thavareak at a poster wall. Link to a tab with `#ricky`, `#sokheng`, `#taxzy`, `#zhampt` or `#seth`.
+One-screen intros behind tabs, each a photo reworked into a night scene that a moving light relights: Ricky Davan at Angkor Wat, Soeng Sokheng against a dark studio wall, Taxzy under a wooden gate, Zhampt in a dark room, Reggy on the rocks above a waterfall and Seth Thavareak at a poster wall. Link to a tab with `#ricky`, `#sokheng`, `#taxzy`, `#zhampt`, `#reggy` or `#seth`.
 
 ```bash
 npm install
@@ -39,6 +39,14 @@ python tools/build_night.py photo_seth_even.jpg maps/seth src/textures seth 0 3 
 `even_light.py` divides the hard sunlight out of the photo first, so the moving light isn't fighting a shadow baked into the pixels.
 
 `photo_seth.jpg` is the HEIC original with the top 15% and right 18% cropped off, at 1302×1800.
+
+```bash
+python tools/masks.py photo_reggy.jpg maps/reggy
+python tools/build_night.py photo_reggy.jpg maps/reggy src/textures reggy 0 0 0.4
+python tools/fix_treeline.py src/textures/reggy.webp src/textures/reggy-depth.webp
+```
+
+`photo_reggy.jpg` is the HEIC original (4284×5712) cropped to x 279–3849, y 876–5636 and resized to 1350×1800. The crop is needed: uncropped, he fills under 10% of the frame and `build_night.py` stops with "lost the figure". `fix_treeline.py` paints over the pale overcast sky left between the treetops, which would otherwise show as a white halo against the night sky.
 
 ```bash
 python tools/masks.py photo_sokheng.jpg maps/sokheng

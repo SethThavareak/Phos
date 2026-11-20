@@ -35,6 +35,11 @@ body {
   background-position: 90% 100%;
 }
 
+[data-person="reggy"] #app {
+  background-image: url("./textures/reggy.webp");
+  background-position: 90% 100%;
+}
+
 [data-person="seth"] #app {
   background-image: url("./textures/seth.webp");
   background-position: 88% 100%;
