@@ -10,6 +10,8 @@ import { createPlane } from './effect/plane.js'
 import { setupTextures } from './effect/textures.js'
 import rickyDepth from './textures/hero-depth.webp'
 import rickyMap from './textures/hero.webp'
+import reggyDepth from './textures/reggy-depth.webp'
+import reggyMap from './textures/reggy.webp'
 import sethDepth from './textures/seth-depth.webp'
 import sethMap from './textures/seth.webp'
 import sokhengDepth from './textures/sokheng-depth.webp'
@@ -30,6 +32,7 @@ const people = {
   sokheng: { map: sokhengMap, depth: sokhengDepth, focusY: 0, wallDepth: 0.4, title: 'Soeng Sokheng — Software Developer' },
   taxzy: { map: taxzyMap, depth: taxzyDepth, focusY: 0, wallDepth: 0.4, title: 'Taxzy — Founder of ZLI' },
   zhampt: { map: zhamptMap, depth: zhamptDepth, focusY: 0, wallDepth: 0.4, title: 'Zhampt — Husband' },
+  reggy: { map: reggyMap, depth: reggyDepth, focusY: 0, wallDepth: 0.4, title: 'Reggy' },
   // focusX centres him on phones.
   seth: { map: sethMap, depth: sethDepth, focusX: 0.88, focusY: 0, wallDepth: 0.4, title: 'Seth Thavareak' },
 }
